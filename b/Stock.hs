@@ -41,6 +41,9 @@ getSell inp =
         inp
 
 -- | For find the best and latest day to buy
+getBuy :: (Monad m)
+       => Array U DIM1 (Int,Int,Int)
+       -> m (Array U DIM0 (Int,Int,Int))
 getBuy inp =
   foldP (\(b1,s1,p1) (b2,s2,p2) ->
            if p1 > p2 -- pick the later buy days
@@ -55,6 +58,3 @@ buySell prices = do let mat = buildMatrix prices
                     foundSell <- getSell mat
                     foundBuy <- getBuy foundSell
                     return (foundBuy ! Z)
-
-
---buySell l = maximum (zipWith (-) l (scanl1 min l))
