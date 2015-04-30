@@ -17,20 +17,21 @@ test2 = let l = [12, 11, 10, 8, 5, 8, 9, 6, 7, 7, 10, 7, 4, 2]
         in fromListUnboxed (Z :. length l) l
 
 -- | Build matrix of all possible (buy, sell, profit) tuples
-buildMatrix :: Array U DIM1 Int -> Array D DIM2 (Int, Int, Int)
+buildMatrix :: (Monad m) => Array U DIM1 Int -> m (Array U DIM2 (Int, Int, Int))
 buildMatrix inp =
-  traverse inp
-           (\(Z :. x) -> ix2 x x)
-           (\idx (Z :. b :. s) ->
-              if s < b
-                 then (b,s,-1)
-                 else (b
-                      ,s
-                      ,idx (ix1 s) - idx (ix1 b)))
+  computeP
+    (traverse inp
+              (\(Z :. x) -> ix2 x x)
+              (\idx (Z :. b :. s) ->
+                 if s < b
+                    then (b,s,-1)
+                    else (b
+                         ,s
+                         ,idx (ix1 s) - idx (ix1 b))))
 
 -- | For each buy day find the earliest sell day with largest profit
 getSell :: (Monad m)
-        => Array D DIM2 (Int,Int,Int)
+        => Array U DIM2 (Int,Int,Int)
         -> m (Array U DIM1 (Int,Int,Int))
 getSell inp =
   foldP (\(b1,s1,p1) (b2,s2,p2) ->
@@ -54,7 +55,7 @@ getBuy inp =
 
 -- | Solve the problem
 buySell :: Monad m => Array U DIM1 Int -> m (Int, Int, Int)
-buySell prices = do let mat = buildMatrix prices
+buySell prices = do mat <- buildMatrix prices
                     foundSell <- getSell mat
                     foundBuy <- getBuy foundSell
                     return (foundBuy ! Z)
