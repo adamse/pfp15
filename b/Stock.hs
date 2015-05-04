@@ -7,10 +7,19 @@ import Prelude hiding (zipWith)
 
 import Criterion.Main
 
+import System.Random
+
 main :: IO ()
-main = defaultMain [bench "parallel" (nfIO (buySell datas))
-                   ,bench "sequential" (nf buySellS datas)]
-  where datas = test2
+main =
+  do gen <- getStdGen
+     let n = 1000
+     let ints = take n (randoms gen)
+     let datas =
+           fromListUnboxed (Z :. n)
+                           ints
+     defaultMain
+       [bench "sequential" (nf buySellS datas)
+       ,bench "parallel" (nfIO (buySell datas))]
 
 test :: Array U DIM1 Int
 test = fromListUnboxed (Z :. 8) [0,0,2,9,8,10,1,10]
