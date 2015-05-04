@@ -15,7 +15,7 @@ main =
      let n = 1000
      let ints = take n (randoms gen)
      let datas =
-           fromListUnboxed (Z :. n)
+           fromListUnboxed (ix1 n)
                            ints
      defaultMain
        [bench "sequential" (nf buySellS datas)

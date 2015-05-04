@@ -12,7 +12,18 @@ author:
 - Image manipulation (reading, writing) repa-io
 
 
-# Gaussian blur
+# Image filters
+
+Image manipulation using filters
+
+Inspiration: http://www.html5rocks.com/en/tutorials/canvas/imagefilters/
+
+we start with a simple greyscale filter:
+...
+
+Start with greyscale
+
+## Gaussian blur
 
 - What is
 - Compute blur matrix
@@ -25,12 +36,3 @@ author:
 
 - edge detection
 - other fun stuff
-
-
-# Animations?
-
-Time permitting.
-
-- f :: Time -> Array r DIM2 (R,G,B)
-  or f :: Array r DIM3 (R,G,B) ??
-- use ffmpeg to stitch images together to animation
