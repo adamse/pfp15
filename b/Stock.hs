@@ -5,6 +5,8 @@ module Main where
 import Data.Array.Repa
 import Prelude hiding (zipWith)
 
+import Data.Functor.Identity
+
 import Criterion.Main
 
 import System.Random
@@ -19,7 +21,7 @@ main =
                            ints
      defaultMain
        [bench "sequential" (nf buySellS datas)
-       ,bench "parallel" (nfIO (buySell datas))]
+       ,bench "parallel" (nf (runIdentity . buySell) datas)]
 
 test :: Array U DIM1 Int
 test = fromListUnboxed (Z :. 8) [0,0,2,9,8,10,1,10]
