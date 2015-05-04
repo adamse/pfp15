@@ -64,5 +64,17 @@ the same names as the list functions in the Prelude, it is necessary
 to either import the Repa modules qualified or hide the functions
 from the Prelude.
 
-- Image manipulation (reading, writing) repa-io
 
+## Image manipulation with Repa
+The `repa-io` library has built-in support for reading and writing
+bitmap images with the functions `readImageFromBMP` and
+`writeImageToBMP`. The Repa representation of bitmaps is a
+two-dimensional unboxed array of three-tuples of 8-bit words, meaning
+one element for each pixel, consisting of the RGB-value tuple. To
+manipulate an image, one simply changes the values of these Word8
+colour values.
+
+Because of the excellent parallelism scaling that Repa has when
+working on the individual elements in a pixel, Repa is very good for
+writing image manipulation functions for filters etc. that can operate
+on each pixel independently.
