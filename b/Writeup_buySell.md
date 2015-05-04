@@ -31,24 +31,28 @@ In total we have
 
 # Speedup of parallelism!
 
-Running the same algorithm sequentially and in parllel (with 2 HECs)
-we get a speedup of approximately 5.5, which is pretty amazing.
+Running the same algorithm sequentially and in parallel (with 2 HECs)
+we get a speedup of almost 2, which is pretty good.
 
 An example run
 
 ~~~
 % ./Stock +RTS -N2
 benchmarking sequential
-time                 1.287 s    (1.164 s .. 1.403 s)
-                     0.998 R²   (0.998 R² .. 1.000 R²)
-mean                 1.295 s    (1.269 s .. 1.308 s)
-std dev              22.22 ms   (0.0 s .. 23.82 ms)
-variance introduced by outliers: 19% (moderately inflated)
+time                 22.66 ms   (22.18 ms .. 23.14 ms)
+                     0.998 R²   (0.997 R² .. 0.999 R²)
+mean                 23.41 ms   (22.99 ms .. 24.61 ms)
+std dev              1.470 ms   (436.5 us .. 2.567 ms)
+variance introduced by outliers: 24% (moderately inflated)
 
 benchmarking parallel
-time                 232.9 ms   (216.9 ms .. 251.5 ms)
-                     0.996 R²   (0.988 R² .. 1.000 R²)
-mean                 224.7 ms   (214.2 ms .. 230.7 ms)
-std dev              9.634 ms   (3.687 ms .. 13.16 ms)
-variance introduced by outliers: 14% (moderately inflated)
+time                 12.19 ms   (11.92 ms .. 12.67 ms)
+                     0.992 R²   (0.982 R² .. 0.998 R²)
+mean                 12.69 ms   (12.38 ms .. 13.49 ms)
+std dev              1.222 ms   (610.9 us .. 2.055 ms)
+variance introduced by outliers: 50% (severely inflated)
 ~~~
+
+The code is compiled with `-Odph -rtsopts -threaded -fno-liberate-case
+-funfolding-use-threshold1000 -funfolding-keeness-factor1000 -fllvm
+-optlo-O3` as is recommended in the Repa documentation.
