@@ -1,6 +1,25 @@
--module(sudoku).
+-module(par_rows_sudoku).
 %-include_lib("eqc/include/eqc.hrl").
 -compile(export_all).
+
+%% %% Helper functions
+%% parallel map
+%% version from: http://montsamu.blogspot.se/2007/02/erlang-parallel-map-and-parallel.html
+
+pmap(F, L) ->
+      S = self(),
+          Pids = lists:map(fun(I) -> spawn(fun() -> pmap_f(S, F, I) end) end, L),
+              pmap_gather(Pids).
+
+pmap_gather([H|T]) ->
+      receive
+                {H, Ret} -> [Ret|pmap_gather(T)]
+                                end;
+pmap_gather([]) ->
+      [].
+
+pmap_f(Parent, F, I) ->
+      Parent ! {self(), (catch F(I))}.
 
 %% %% generators
 
@@ -98,7 +117,7 @@ refine(M) ->
     end.
 
 refine_rows(M) ->
-    lists:map(fun refine_row/1,M).
+    pmap(fun refine_row/1,M).
 
 refine_row(Row) ->
     Entries = entries(Row),
