@@ -1,0 +1,23 @@
+no parallelism:
+
+{100384588,
+ [{wildcat,0.62886},
+  {diabolical,75.74654},
+  {vegard_hanssen,194.76248999999999},
+  {challenge,13.178360000000001},
+  {challenge1,648.03425},
+  {extreme,15.13585},
+  {seventeen,56.359339999999996}]}
+
+parallel benchmarks:
+
+{69662750,
+ [{wildcat,4.18391},
+  {extreme,26.82369},
+  {challenge,53.24754},
+  {seventeen,104.5336},
+  {diabolical,157.2561},
+  {vegard_hanssen,234.93266},
+  {challenge1,696.61771}]}
+
+speedup: 1.44x
