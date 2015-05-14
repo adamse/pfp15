@@ -1,5 +1,5 @@
--module(sudoku).
-%-include_lib("eqc/include/eqc.hrl").
+-module(sudoku_par_bench).
+                                                %-include_lib("eqc/include/eqc.hrl").
 -compile(export_all).
 
 %% %% generators
@@ -232,11 +232,14 @@ repeat(F) ->
     [F() || _ <- lists:seq(1,?EXECUTIONS)].
 
 benchmarks(Puzzles) ->
-    [{Name,bm(fun()->solve(M) end)} || {Name,M} <- Puzzles].
+    Parent = self(),
+    [spawn_link(fun () -> Parent ! {Name,bm(fun()->solve(M) end)} end) ||
+                   {Name,M} <- Puzzles],
+    [receive T -> T end || _ <- Puzzles].
 
 benchmarks() ->
-  {ok,Puzzles} = file:consult("problems.txt"),
-  timer:tc(?MODULE,benchmarks,[Puzzles]).
+    {ok,Puzzles} = file:consult("problems.txt"),
+    timer:tc(?MODULE,benchmarks,[Puzzles]).
 
 %% check solutions for validity
 
