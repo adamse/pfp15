@@ -129,13 +129,16 @@ intersect(A,B,C,N) ->
 
 refine(M) ->
   Parent = self(),
-  spawn_link(fun() -> Parent ! refine_rows(M) end),
-  spawn_link(fun() -> Parent ! transpose(refine_rows(transpose(M))) end),
-  spawn_link(fun() -> Parent ! unblocks(refine_rows(blocks(M))) end),
+  ARef = make_ref(),
+  BRef = make_ref(),
+  CRef = make_ref(),
+  spawn_link(fun() -> Parent ! {ARef, refine_rows(M)} end),
+  spawn_link(fun() -> Parent ! {BRef, transpose(refine_rows(transpose(M)))} end),
+  spawn_link(fun() -> Parent ! {CRef, unblocks(refine_rows(blocks(M)))} end),
   
-  receive A ->
-  receive B ->
-  receive C ->
+  receive {ARef, A} ->
+  receive {BRef, B} ->
+  receive {CRef, C} ->
   
   NewM = intersect(A,B,C,2),
       
