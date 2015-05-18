@@ -65,8 +65,26 @@ problems (for example challenge1 can be made quicker) but it then gets
 worse on other leading to a worse overall speedup.
 
 
-
 parallel rows:
+
+{210319425,
+ [{wildcat,1.19068},
+  {diabolical,170.24357999999998},
+  {vegard_hanssen,374.60790999999995},
+  {challenge,26.28386},
+  {challenge1,1363.8615},
+  {extreme,33.52058},
+  {seventeen,133.48591}]}
+
+overall speedup: 0.48
+challenge: 0.50
+challenge1: 0.48
+diabolical: 0.44
+extreme: 0.45
+seventeen: 0.42
+vegard_hanssen: 0.52
+wildcat: 0.53
+geometric mean: 0.48
 
 
 When parallelising the refine_row function, lots of processes get
