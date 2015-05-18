@@ -34,7 +34,8 @@ wildcat: 0.15
 
 As can be seen in the graph par_bench.png we achieve nice parallelism
 for about half the time, but the process handling the challenge1
-sudoku is more than twice as long.
+sudoku is more than twice as long, because of switching between solving
+different puzzles.
 
 
 parallel guesses:
@@ -59,6 +60,6 @@ wildcat: 0.94
 geometric mean: 1.24
 
 This is parallel guessing only for the first possible guesses, the
-depth can be increased to yeild better results for some of the
+depth can be increased to yield better results for some of the
 problems (for example challenge1 can be made quicker) but it then gets
 worse on other leading to a worse overall speedup.
