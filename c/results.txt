@@ -63,3 +63,16 @@ This is parallel guessing only for the first possible guesses, the
 depth can be increased to yield better results for some of the
 problems (for example challenge1 can be made quicker) but it then gets
 worse on other leading to a worse overall speedup.
+
+
+
+parallel rows:
+
+
+When parallelising the refine_row function, lots of processes get
+spawned (27 for each run of refine), because there are nine real rows,
+nine "column rows" and nine "box rows". In fact the processes were too
+many for percept to be able to analyse the data, and this is a good
+example of too fine granularity when parallelising. As we see, the
+total running time doubled, compared to the sequential benchmarking
+of the solver.
