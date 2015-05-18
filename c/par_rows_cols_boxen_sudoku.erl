@@ -79,19 +79,23 @@ fill(M) ->
       || X <- Row]
      || Row <- M].
 
+%% makes L a list in case it isn't
+listify (L) ->
+  if is_list(L) -> L;
+     true -> [L]
+  end.
 
 %% intersects the positions on a sudoku board
-
-intersect(A, B, C) ->
-  [intersect_row(E,F,G) || E <- A, F <- B, G <- C].
-
-intersect_row(A,B,C) ->
-  lists:zipwith3(fun(M,N,L)->sets:to_list(
-                               sets:intersection(
-                                 [sets:from_list(M),
-                                  sets:from_list(N),
-                                  sets:from_list(L)])) end,
-                 A, B, C).
+intersect(A,B,C,N) ->
+  case N of
+    0 -> sets:to_list(sets:intersection(
+                   [sets:from_list(listify(A)),
+                    sets:from_list(listify(B)),
+                    sets:from_list(listify(C))]));
+    _ ->
+      M = N-1,
+      lists:zipwith3(fun(X,Y,Z) -> intersect(X,Y,Z,M) end, A, B, C)
+    end.
 
 %% refine entries which are lists by removing numbers they are known
 %% not to be
@@ -106,7 +110,7 @@ refine(M) ->
   receive B -> B,
   receive C -> C,
   
-  NewM = intersect_row(A,B,C),
+  NewM = intersect(A,B,C,2),
       
   if M==NewM ->
 	  M;
@@ -239,7 +243,7 @@ solve_one([M|Ms]) ->
 
 %% benchmarks
 
--define(EXECUTIONS,100).
+-define(EXECUTIONS,1).
 
 bm(F) ->
     {T,_} = timer:tc(?MODULE,repeat,[F]),
