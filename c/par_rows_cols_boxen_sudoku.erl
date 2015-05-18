@@ -129,16 +129,19 @@ intersect(A,B,C,N) ->
 
 refine(M) ->
   Parent = self(),
-  spawn_link(fun() -> Parent ! refine_rows(M) end),
-  spawn_link(fun() -> Parent ! transpose(refine_rows(transpose(M))) end),
-  spawn_link(fun() -> Parent ! unblocks(refine_rows(blocks(M))) end),
-
-  receive A ->
-  receive B ->
-  receive C ->
-
+  ARef = make_ref(),
+  BRef = make_ref(),
+  CRef = make_ref(),
+  spawn_link(fun() -> Parent ! {ARef, refine_rows(M)} end),
+  spawn_link(fun() -> Parent ! {BRef, transpose(refine_rows(transpose(M)))} end),
+  spawn_link(fun() -> Parent ! {CRef, unblocks(refine_rows(blocks(M)))} end),
+  
+  receive {ARef, A} ->
+  receive {BRef, B} ->
+  receive {CRef, C} ->
+  
   NewM = intersect(A,B,C,2),
-
+      
   case NewM of
     M -> M;
     _ -> refine(NewM)
@@ -187,7 +190,7 @@ solved_row(Row) ->
 
 %% how hard is the puzzle?
 
-hard(M) ->
+hard(M) ->		      
     lists:sum(
       [lists:sum(
 	 [if is_list(X) ->
@@ -284,7 +287,7 @@ benchmarks(Puzzles) ->
 benchmarks() ->
   {ok,Puzzles} = file:consult("problems.txt"),
   timer:tc(?MODULE,benchmarks,[Puzzles]).
-
+		      
 %% check solutions for validity
 
 valid_rows(M) ->
@@ -295,3 +298,4 @@ valid_row(Row) ->
 
 valid_solution(M) ->
     valid_rows(M) andalso valid_rows(transpose(M)) andalso valid_rows(blocks(M)).
+

@@ -34,7 +34,8 @@ wildcat: 0.15
 
 As can be seen in the graph par_bench.png we achieve nice parallelism
 for about half the time, but the process handling the challenge1
-sudoku is more than twice as long.
+sudoku is more than twice as long, because of switching between solving
+different puzzles.
 
 
 parallel guesses:
@@ -59,7 +60,7 @@ wildcat: 0.94
 geometric mean: 1.24
 
 This is parallel guessing only for the first possible guesses, the
-depth can be increased to yeild better results for some of the
+depth can be increased to yield better results for some of the
 problems (for example challenge1 can be made quicker) but it then gets
 worse on other leading to a worse overall speedup.
 
@@ -84,3 +85,12 @@ seventeen: 0.42
 vegard_hanssen: 0.52
 wildcat: 0.53
 geometric mean: 0.48
+
+
+When parallelising the refine_row function, lots of processes get
+spawned (27 for each run of refine), because there are nine real rows,
+nine "column rows" and nine "box rows". In fact the processes were too
+many for percept to be able to analyse the data, and this is a good
+example of too fine granularity when parallelising. As we see, the
+total running time doubled, compared to the sequential benchmarking
+of the solver.
