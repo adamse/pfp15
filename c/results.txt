@@ -76,3 +76,21 @@ many for percept to be able to analyse the data, and this is a good
 example of too fine granularity when parallelising. As we see, the
 total running time doubled, compared to the sequential benchmarking
 of the solver.
+
+
+
+
+parallel rows/columns/boxes:
+
+
+We tried parallelising the refining of the rows, columns and boxes of
+a sudoku puzzle. We only got it running for the wildcat puzzle so far,
+but it ran about 11 times slower than the sequential solver, which is
+probably partly because of the increased work. The sequential solver
+first refines boxes, then takes the refined version, refines the
+columns, take the refined version and refines the rows, making the
+data to work at smaller at each step. When parallelising these three,
+they all have to work at the iteration's initial sudoku puzzle, i.e.
+two of them work on potentially bigger data. After all three are done,
+there is also a need of converting lists to sets, taking out the
+intersection and lastly converting back from sets to lists.
