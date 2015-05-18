@@ -176,18 +176,6 @@ guesses(M) ->
 	      not is_exit(NewM)]),
     [G || {_,G} <- SortedGuesses].
 
-parmap(F, Ms) ->
-    Parent = self(),
-    Pids = lists:map(fun (M) ->
-                            spawn(fun () ->
-                                          Pid = self(),
-                                          R = F(M),
-                                          Parent ! {Pid, R} end) end,
-                    Ms),
-    lists:map(fun (Pid) -> receive {Pid, R} -> R end end,
-             Pids).
-
-
 update_element(M,I,J,G) ->
     update_nth(I,update_nth(J,G,lists:nth(I,M)),M).
 
@@ -204,16 +192,6 @@ update_nth(I,X,Xs) ->
 %% solve a puzzle
 
 -define(DEPTH, 1).
-
-seventeen() -> [[0,0,0,7,0,0,0,0,0],
-                [1,0,0,0,0,0,0,0,0],
-                [0,0,0,4,3,0,2,0,0],
-                [0,0,0,0,0,0,0,0,6],
-                [0,0,0,5,0,9,0,0,0],
-                [0,0,0,0,0,0,4,1,8],
-                [0,0,0,0,8,1,0,0,0],
-                [0,0,2,0,0,0,0,5,0],
-                [0,4,0,0,0,0,3,0,0]].
 
 solve(M) ->
     Refined = refine(fill(M)),

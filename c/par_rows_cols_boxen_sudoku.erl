@@ -105,13 +105,13 @@ refine(M) ->
   spawn_link(fun() -> Parent ! refine_rows(M) end),
   spawn_link(fun() -> Parent ! transpose(refine_rows(transpose(M))) end),
   spawn_link(fun() -> Parent ! unblocks(refine_rows(blocks(M))) end),
-  
-  receive A -> A,
-  receive B -> B,
-  receive C -> C,
-  
+
+  receive A ->
+  receive B ->
+  receive C ->
+
   NewM = intersect(A,B,C,2),
-      
+
   if M==NewM ->
 	  M;
      true ->
@@ -161,7 +161,7 @@ solved_row(Row) ->
 
 %% how hard is the puzzle?
 
-hard(M) ->		      
+hard(M) ->
     lists:sum(
       [lists:sum(
 	 [if is_list(X) ->
@@ -258,7 +258,7 @@ benchmarks(Puzzles) ->
 benchmarks() ->
   {ok,Puzzles} = file:consult("problems.txt"),
   timer:tc(?MODULE,benchmarks,[Puzzles]).
-		      
+
 %% check solutions for validity
 
 valid_rows(M) ->
@@ -269,4 +269,3 @@ valid_row(Row) ->
 
 valid_solution(M) ->
     valid_rows(M) andalso valid_rows(transpose(M)) andalso valid_rows(blocks(M)).
-

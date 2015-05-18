@@ -1,3 +1,5 @@
+All benchmarks on a 2 core Intel Core i5 at 1.8GHz.
+
 no parallelism:
 
 {100384588,
@@ -8,6 +10,7 @@ no parallelism:
   {challenge1,648.03425},
   {extreme,15.13585},
   {seventeen,56.359339999999996}]}
+
 
 parallel benchmarks:
 
@@ -20,4 +23,42 @@ parallel benchmarks:
   {vegard_hanssen,234.93266},
   {challenge1,696.61771}]}
 
-speedup: 1.44x
+overall speedup: 1.44
+challenge: 0.25
+challenge1: 0.93
+diabolical: 0.48
+extreme: 0.56
+seventeen: 0.54
+vegard_hanssen: 0.83
+wildcat: 0.15
+
+As can be seen in the graph par_bench.png we achieve nice parallelism
+for about half the time, but the process handling the challenge1
+sudoku is more than twice as long.
+
+
+parallel guesses:
+
+{79782203,
+ [{wildcat,0.6725599999999999},
+  {diabolical,36.911339999999996},
+  {vegard_hanssen,86.60652},
+  {challenge,7.07066},
+  {challenge1,579.6075500000001},
+  {extreme,30.71952},
+  {seventeen,56.23366}]}
+
+overall speedup: 1.26
+challenge: 1.86
+challenge1: 1.12
+diabolical: 2.05
+extreme: 0.49
+seventeen: 1.00
+vegard_hanssen: 2.25
+wildcat: 0.94
+geometric mean: 1.24
+
+This is parallel guessing only for the first possible guesses, the
+depth can be increased to yeild better results for some of the
+problems (for example challenge1 can be made quicker) but it then gets
+worse on other leading to a worse overall speedup.
