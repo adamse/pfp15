@@ -248,4 +248,3 @@ valid_row(Row) ->
 
 valid_solution(M) ->
     valid_rows(M) andalso valid_rows(transpose(M)) andalso valid_rows(blocks(M)).
->>>>>>> d35d7668c6155fda8e801be3d3413272c684330c

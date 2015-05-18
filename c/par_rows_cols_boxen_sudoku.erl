@@ -2,6 +2,26 @@
 %-include_lib("eqc/include/eqc.hrl").
 -compile(export_all).
 
+seventeen() -> [[0,0,0,7,0,0,0,0,0],
+  [1,0,0,0,0,0,0,0,0],
+  [0,0,0,4,3,0,2,0,0],
+  [0,0,0,0,0,0,0,0,6],
+  [0,0,0,5,0,9,0,0,0],
+  [0,0,0,0,0,0,4,1,8],
+  [0,0,0,0,8,1,0,0,0],
+  [0,0,2,0,0,0,0,5,0],
+  [0,4,0,0,0,0,3,0,0]].
+
+wildcat() -> [[0,0,0,2,6,0,7,0,1],
+  [6,8,0,0,7,0,0,9,0],
+  [1,9,0,0,0,4,5,0,0],
+  [8,2,0,1,0,0,0,4,0],
+  [0,0,4,6,0,2,9,0,0],
+  [0,5,0,0,0,3,0,2,8],
+  [0,0,9,3,0,0,0,7,4],
+  [0,4,0,0,5,0,0,3,6],
+  [7,0,3,0,1,8,0,0,0]].
+
 %% %% generators
 
 %% matrix(M,N) ->
@@ -85,13 +105,20 @@ listify (L) ->
      true -> [L]
   end.
 
+%% makes L an element if it only contains a single element
+unlistify (L) ->
+  case length(L) of
+    1 -> lists:nth(1,L);
+    _ -> L
+  end.
+
 %% intersects the positions on a sudoku board
 intersect(A,B,C,N) ->
   case N of
-    0 -> sets:to_list(sets:intersection(
+    0 -> unlistify(sets:to_list(sets:intersection(
                    [sets:from_list(listify(A)),
                     sets:from_list(listify(B)),
-                    sets:from_list(listify(C))]));
+                    sets:from_list(listify(C))])));
     _ ->
       M = N-1,
       lists:zipwith3(fun(X,Y,Z) -> intersect(X,Y,Z,M) end, A, B, C)
@@ -106,16 +133,15 @@ refine(M) ->
   spawn_link(fun() -> Parent ! transpose(refine_rows(transpose(M))) end),
   spawn_link(fun() -> Parent ! unblocks(refine_rows(blocks(M))) end),
   
-  receive A -> A,
-  receive B -> B,
-  receive C -> C,
+  receive A ->
+  receive B ->
+  receive C ->
   
   NewM = intersect(A,B,C,2),
       
-  if M==NewM ->
-	  M;
-     true ->
-	  refine(NewM)
+  case NewM of
+    M -> M;
+    _ -> refine(NewM)
   end end end end.
 
 refine_rows(M) ->
@@ -243,7 +269,7 @@ solve_one([M|Ms]) ->
 
 %% benchmarks
 
--define(EXECUTIONS,1).
+-define(EXECUTIONS,100).
 
 bm(F) ->
     {T,_} = timer:tc(?MODULE,repeat,[F]),
