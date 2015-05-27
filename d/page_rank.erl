@@ -31,6 +31,8 @@ page_rank_par() ->
     dets:close(web),
     Res.
 
+% 197,133911
+% three nodes on same computer
 page_rank_dist() ->
     Nodes = [node() | nodes()],
 %    dets:open_file(web, [{file, ?DATABASE}]),
@@ -43,6 +45,15 @@ page_rank_dist() ->
     % close database on all nodes
 %    [ rpc:call(Node, dets, close, [web]) || Node <- Nodes ],
     Res.
+
+page_rank_dist2() ->
+    Nodes = [node() | nodes()],
+    Urls = dets:foldl(fun({K,_},Keys) ->
+                              [K|Keys] end,[],web),
+    Res = map_reduce:map_reduce_bal(fun map/2, 32, fun reduce/2, 32,
+                              [{Url,ok} || Url <- Urls], Nodes, 5),
+    Res.
+
 
 
 bm() ->
