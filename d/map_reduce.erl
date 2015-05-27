@@ -70,3 +70,37 @@ spawn_reducer(Parent,Reduce,I,Mappeds) ->
                    KV <- KVs],
     spawn_link(fun() -> Parent ! {self(),reduce_seq(Reduce,Inputs)}
                end).
+
+map_reduce_dist(Map,M,Reduce,R,Input,Nodes) ->
+    Parent = self(),
+    Splits = split_into(M,Input),
+    NNodes = length(Nodes),
+    Mappers =
+        [spawn_mapper_dist(Parent, Map, R, Split,
+                           lists:nth(erlang:phash2(Split, NNodes) + 1, Nodes))
+         || Split <- Splits],
+    Mappeds =
+        [receive {Pid,L} -> L end || Pid <- Mappers],
+    Reducers = [spawn_reducer_dist(Parent, Reduce, I, Mappeds,
+                                   lists:nth(erlang:phash2(I, NNodes) + 1, Nodes))
+                || I <- lists:seq(0,R-1)],
+    Reduceds =
+        [receive {Pid,L} -> L end || Pid <- Reducers],
+    lists:sort(lists:flatten(Reduceds)).
+
+spawn_mapper_dist(Parent,Map,R,Split,Node) ->
+    spawn_link(Node, fun() ->
+                             Mapped = [{erlang:phash2(K2,R),{K2,V2}}
+                                       || {K,V} <- Split,
+                                          {K2,V2} <- Map(K,V)],
+                             Parent !
+                                 {self(),group(lists:sort(Mapped))}
+                     end).
+
+spawn_reducer_dist(Parent,Reduce,I,Mappeds,Node) ->
+    Inputs = [KV || Mapped <- Mappeds,
+                    {J,KVs} <- Mapped,
+                    I==J,
+                    KV <- KVs],
+    spawn_link(Node, fun() -> Parent ! {self(),reduce_seq(Reduce,Inputs)}
+                     end).
