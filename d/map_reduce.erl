@@ -73,16 +73,16 @@ spawn_reducer(Parent,Reduce,I,Mappeds) ->
 
 map_reduce_dist(Map,M,Reduce,R,Input,Nodes) ->
     Parent = self(),
-    Splits = split_into(M,Input),
-    NNodes = length(Nodes),
+    Splits = lists:zip(lists:seq(0, M-1), split_into(M, Input)),
+    NoNodes = length(Nodes),
     Mappers =
         [spawn_mapper_dist(Parent, Map, R, Split,
-                           lists:nth(erlang:phash2(Split, NNodes) + 1, Nodes))
-         || Split <- Splits],
+                           lists:nth(erlang:phash2(SplitNo, NoNodes) + 1, Nodes))
+         || {SplitNo, Split} <- Splits],
     Mappeds =
         [receive {Pid,L} -> L end || Pid <- Mappers],
     Reducers = [spawn_reducer_dist(Parent, Reduce, I, Mappeds,
-                                   lists:nth(erlang:phash2(I, NNodes) + 1, Nodes))
+                                   lists:nth(erlang:phash2(I, NoNodes) + 1, Nodes))
                 || I <- lists:seq(0,R-1)],
     Reduceds =
         [receive {Pid,L} -> L end || Pid <- Reducers],
