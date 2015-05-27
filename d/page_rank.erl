@@ -32,6 +32,7 @@ page_rank_par() ->
     Res.
 
 % 197,133911
+% 268,894667
 % three nodes on same computer
 page_rank_dist() ->
     Nodes = [node() | nodes()],
@@ -46,6 +47,7 @@ page_rank_dist() ->
 %    [ rpc:call(Node, dets, close, [web]) || Node <- Nodes ],
     Res.
 
+% 83,850272
 page_rank_dist2() ->
     Nodes = [node() | nodes()],
     Urls = dets:foldl(fun({K,_},Keys) ->
@@ -57,5 +59,5 @@ page_rank_dist2() ->
 
 
 bm() ->
-    Funs = [page_rank, page_rank_par],
-    [ case timer:tc(?MODULE, Fun, []) of {T,_} -> T/1000000 end || Fun <- Funs ].
+    Funs = [page_rank, page_rank_par, page_rank_dist, page_rank_dist2],
+    [ case timer:tc(?MODULE, Fun, []) of {T,_} -> {Fun, T/1000000} end || Fun <- Funs ].

@@ -111,17 +111,14 @@ map_reduce_bal(Map, M, Reduce, R, Input, Nodes, WorkersPerNode) ->
     Mappers =
         [mapper_bal(Map, R, Split)
          || Split <- Splits],
-    RefMapperWorker = make_ref(),
-    spawn_link(fun () -> io:format("starting mapper workers~n"), Me ! worker_pool(Mappers, Nodes, WorkersPerNode) end),
-    receive Mappeds ->
-            io:format("mappers done~n"),
+    Ref = make_ref(),
+    spawn_link(fun () -> Me ! {Ref, worker_pool(Mappers, Nodes, WorkersPerNode)} end),
+    receive {Ref, Mappeds} ->
             Reducers = [reducer_bal(Reduce, I, Mappeds)
                         || I <- lists:seq(0,R-1)],
             RefReducerWorker = make_ref(),
-            spawn_link(fun () -> io:format("starting reducer workers~n"), Me ! {RefReducerWorker, worker_pool(Reducers, Nodes, WorkersPerNode)} end),
+            spawn_link(fun () -> Me ! {RefReducerWorker, worker_pool(Reducers, Nodes, WorkersPerNode)} end),
             receive {RefReducerWorker, Reduceds} ->
-                    io:format("reducers done~n"),
-                    [receive {Pid,L} -> L end || Pid <- Reducers],
                     lists:sort(lists:flatten(Reduceds))
             end
     end.
@@ -135,26 +132,24 @@ mapper_bal(Map,R,Split) ->
     end.
 
 reducer_bal(Reduce,I,Mappeds) ->
-    Inputs = [KV || Mapped <- Mappeds,
-                    {J,KVs} <- Mapped,
-                    I==J,
-                    KV <- KVs],
-    fun() -> reduce_seq(Reduce,Inputs) end.
+    fun() ->
+            Inputs = [KV || Mapped <- Mappeds,
+                            {J,KVs} <- Mapped,
+                            I==J,
+                            KV <- KVs],
+            reduce_seq(Reduce,Inputs)
+    end.
 
 worker(Master) ->
-    fun () ->
-            Me = self(),
-            io:format("starting worker: ~n"),
-            receive {job, Job} ->
-                    io:format("worker working~n"),
-                    Master ! {done, Me, Job()},
-                    worker(Master)
-            end
+    Me = self(),
+    receive {job, Job} ->
+            Master ! {done, Me, Job()},
+            worker(Master)
     end.
 
 worker_pool(Funs, Nodes, WorkersPerNode) ->
     Me = self(),
-    Workers = lists:flatten([ [ spawn_link(Node, worker(Me))
+    Workers = lists:flatten([ [ spawn_link(Node, fun () -> worker(Me) end)
                                 || _ <- lists:seq(1, WorkersPerNode) ]
                               || Node <- Nodes ]),
     pool(Workers, Funs, []).
@@ -163,10 +158,8 @@ pool(_, [], Acc) ->
     Acc;
 pool([], Funs, Acc) ->
     receive {done, Worker, Result} ->
-            io:format("worker done: ~n"),
             pool([Worker], Funs, [Result|Acc])
     end;
 pool([Worker|Workers], [Fun|Funs], Acc) ->
-    io:format("dispatching worker: ~n"),
     Worker ! {job, Fun},
     pool(Workers, Funs, Acc).
