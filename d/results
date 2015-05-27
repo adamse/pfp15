@@ -4,3 +4,11 @@ Laptop, core2duo 2x1.3GHz + Stat, core2quad 4x2.3GHz (from laptop)
  {page_rank_par,220.001362},
   {page_rank_dist,143.184218},
    {page_rank_dist2,59.603026}]
+
+Laptop, core2duo 2x1.3GHz + Stat, core2quad 4x2.3GHz (from stat)
+[{page_rank,296.149857},
+ {page_rank_par,107.596936},
+  {page_rank_dist,99.360448},
+   {page_rank_dist2,52.116914}]
+
+
