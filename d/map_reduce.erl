@@ -17,9 +17,11 @@ map_reduce_seq(Map,Reduce,Input) ->
               || {K,V} <- Input,
                  {K2,V2} <- Map(K,V)],
     reduce_seq(Reduce,Mapped).
+
 reduce_seq(Reduce,KVs) ->
     [KV || {K,Vs} <- group(lists:sort(KVs)),
            KV <- Reduce(K,Vs)].
+
 group([]) ->
     [];
 group([{K,V}|Rest]) ->

@@ -23,7 +23,7 @@ follow(D,KVs) ->
 map(Url,undefined) ->
   Body = fetch_url(Url),
   [{Url,Body}] ++
-    [{U,undefined} || U <-find_urls(Url,Body)];
+    [{U,undefined} || U <- find_urls(Url,Body)];
 map(Url,Body) ->
   [{Url,Body}].
 
