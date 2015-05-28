@@ -154,12 +154,61 @@ worker_pool(Funs, Nodes, WorkersPerNode) ->
                               || Node <- Nodes ]),
     pool(Workers, Funs, []).
 
-pool(_, [], Acc) ->
-    Acc;
+
+% stores working workers in the process dictionary
 pool([], Funs, Acc) ->
-    receive {done, Worker, Result} ->
-            pool([Worker], Funs, [Result|Acc])
+    case get() of
+        [] -> Acc;
+        _ -> receive {done, Worker, Result} ->
+                     erase(Worker),
+                     pool([Worker], Funs, [Result|Acc])
+             end
     end;
 pool([Worker|Workers], [Fun|Funs], Acc) ->
+    put(Worker, 1),
+    Worker ! {job, Fun},
+    pool(Workers, Funs, Acc).
+
+
+map_reduce_fault(Map, M, Reduce, R, Input, Nodes, WorkersPerNode) ->
+    Me = self(),
+    Splits = split_into(M, Input),
+    Mappers =
+        [mapper_bal(Map, R, Split)
+         || Split <- Splits],
+    Ref = make_ref(),
+    spawn_link(fun () -> Me ! {Ref, worker_pool_fault(Mappers, Nodes, WorkersPerNode)} end),
+    receive {Ref, Mappeds} ->
+            Reducers = [reducer_bal(Reduce, I, Mappeds)
+                        || I <- lists:seq(0,R-1)],
+            RefReducerWorker = make_ref(),
+            spawn_link(fun () -> Me ! {RefReducerWorker, worker_pool_fault(Reducers, Nodes, WorkersPerNode)} end),
+            receive {RefReducerWorker, Reduceds} ->
+                    lists:sort(lists:flatten(Reduceds))
+            end
+    end.
+
+worker_pool_fault(Funs, Nodes, WorkersPerNode) ->
+    Me = self(),
+    Workers = lists:flatten([ [ spawn_link(Node, fun () -> worker(Me) end)
+                                || _ <- lists:seq(1, WorkersPerNode) ]
+                              || Node <- Nodes ]),
+    process_flag(trap_exit, true), % trap 'EXIT' messages
+    pool_fault(Workers, Funs, []).
+
+pool_fault([], Funs, Acc) ->
+    case get() of
+        [] -> Acc;
+        _ -> receive {done, Worker, Result} ->
+                     erase(Worker),
+                     pool([Worker], Funs, [Result|Acc]);
+
+                     {'EXIT', Worker, noconnection} ->
+                     Fun = erase(Worker),
+                     pool([], [Fun|Funs], Acc)
+             end
+    end;
+pool_fault([Worker|Workers], [Fun|Funs], Acc) ->
+    put(Worker, Fun),
     Worker ! {job, Fun},
     pool(Workers, Funs, Acc).

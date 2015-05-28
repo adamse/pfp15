@@ -52,7 +52,13 @@ page_rank_dist2() ->
                               [{Url,ok} || Url <- Urls], Nodes, 5),
     Res.
 
-
+page_rank_dist_fault() ->
+    Nodes = [node() | nodes()],
+    Urls = dets:foldl(fun({K,_},Keys) ->
+                              [K|Keys] end,[],web),
+    Res = map_reduce:map_reduce_fault(fun map/2, 32, fun reduce/2, 32,
+                                    [{Url,ok} || Url <- Urls], Nodes, 5),
+    Res.
 
 bm() ->
     Funs = [page_rank, page_rank_par, page_rank_dist, page_rank_dist2],
