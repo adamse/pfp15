@@ -156,6 +156,10 @@ worker_pool(Funs, Nodes, WorkersPerNode) ->
 
 
 % stores working workers in the process dictionary
+pool([Worker|Workers], [Fun|Funs], Acc) ->
+    put(Worker, 1),
+    Worker ! {job, Fun},
+    pool(Workers, Funs, Acc);
 pool(Workers, Funs, Acc) ->
     case {get(), Funs} of
         {[], []} -> Acc;
@@ -163,11 +167,7 @@ pool(Workers, Funs, Acc) ->
                      erase(Worker),
                      pool([Worker|Workers], Funs, [Result|Acc])
              end
-    end;
-pool([Worker|Workers], [Fun|Funs], Acc) ->
-    put(Worker, 1),
-    Worker ! {job, Fun},
-    pool(Workers, Funs, Acc).
+    end.
 
 
 map_reduce_fault(Map, M, Reduce, R, Input, Nodes, WorkersPerNode) ->
@@ -211,6 +211,8 @@ pool_fault(Workers, Funs, Acc) ->
 
                      {'EXIT', Worker, noconnection} ->
                      Fun = erase(Worker),
-                     pool_fault(Workers, [Fun|Funs], Acc)
+                     Node = node(Worker),
+                     Alive = lists:filter(fun (Pid) -> node(Pid) /= Node end, Workers),
+                     pool_fault(Alive, [Fun|Funs], Acc)
              end
     end.
