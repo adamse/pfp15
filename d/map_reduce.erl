@@ -196,19 +196,21 @@ worker_pool_fault(Funs, Nodes, WorkersPerNode) ->
     process_flag(trap_exit, true), % trap 'EXIT' messages
     pool_fault(Workers, Funs, []).
 
-pool_fault([], Funs, Acc) ->
-    case get() of
-        [] -> Acc;
-        _ -> receive {done, Worker, Result} ->
-                     erase(Worker),
-                     pool_fault([Worker], Funs, [Result|Acc]);
 
-                     {'EXIT', Worker, noconnection} ->
-                     Fun = erase(Worker),
-                     pool_fault([], [Fun|Funs], Acc)
-             end
-    end;
 pool_fault([Worker|Workers], [Fun|Funs], Acc) ->
     put(Worker, Fun),
     Worker ! {job, Fun},
-    pool_fault(Workers, Funs, Acc).
+    pool_fault(Workers, Funs, Acc);
+
+pool_fault(Workers, Funs, Acc) ->
+    case {get(), Funs} of
+        {[], []} -> Acc;
+        _ -> receive {done, Worker, Result} ->
+                     erase(Worker),
+                     pool_fault([Worker|Worker], Funs, [Result|Acc]);
+
+                     {'EXIT', Worker, noconnection} ->
+                     Fun = erase(Worker),
+                     pool_fault(Workers, [Fun|Funs], Acc)
+             end
+    end.
