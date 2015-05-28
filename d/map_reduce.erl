@@ -156,12 +156,12 @@ worker_pool(Funs, Nodes, WorkersPerNode) ->
 
 
 % stores working workers in the process dictionary
-pool([], Funs, Acc) ->
-    case get() of
-        [] -> Acc;
+pool(Workers, Funs, Acc) ->
+    case {get(), Funs} of
+        {[], []} -> Acc;
         _ -> receive {done, Worker, Result} ->
                      erase(Worker),
-                     pool([Worker], Funs, [Result|Acc])
+                     pool([Worker|Workers], Funs, [Result|Acc])
              end
     end;
 pool([Worker|Workers], [Fun|Funs], Acc) ->
