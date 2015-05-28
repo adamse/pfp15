@@ -201,14 +201,14 @@ pool_fault([], Funs, Acc) ->
         [] -> Acc;
         _ -> receive {done, Worker, Result} ->
                      erase(Worker),
-                     pool([Worker], Funs, [Result|Acc]);
+                     pool_fault([Worker], Funs, [Result|Acc]);
 
                      {'EXIT', Worker, noconnection} ->
                      Fun = erase(Worker),
-                     pool([], [Fun|Funs], Acc)
+                     pool_fault([], [Fun|Funs], Acc)
              end
     end;
 pool_fault([Worker|Workers], [Fun|Funs], Acc) ->
     put(Worker, Fun),
     Worker ! {job, Fun},
-    pool(Workers, Funs, Acc).
+    pool_fault(Workers, Funs, Acc).
