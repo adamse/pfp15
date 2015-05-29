@@ -1,14 +1,33 @@
 Laptop, core2duo 2x1.3GHz + Stat, core2quad 4x2.3GHz (from laptop)
-
+(w/o waiting)
 [{page_rank,382.905323},
  {page_rank_par,220.001362},
   {page_rank_dist,143.184218},
    {page_rank_dist2,59.603026}]
 
 Laptop, core2duo 2x1.3GHz + Stat, core2quad 4x2.3GHz (from stat)
+(w/o waiting)
 [{page_rank,296.149857},
  {page_rank_par,107.596936},
   {page_rank_dist,99.360448},
    {page_rank_dist2,52.116914}]
+
+Laptop, core2duo 2x1.3GHz + Stat, core2quad 4x2.3GHz + media, atom 2(4HT)x1.6GHz (from stat)
+[{page_rank,308.617607},
+ {page_rank_par,108.787158},
+  {page_rank_dist,172.463933},
+   {page_rank_dist2,275.4076}]
+
+Laptop, core2duo 2x1.3GHz + Stat, core2quad 4x2.3GHz (from stat)
+[{page_rank,303.153739},
+ {page_rank_par,111.81362},
+  {page_rank_dist,91.905363},
+   {page_rank_dist2,143.939145}]
+
+Stat, core2quad 4x2.3GHz (from stat)
+[{page_rank,314.64191},
+ {page_rank_par,108.117175},
+  {page_rank_dist,110.29865},
+   {page_rank_dist2,181.933006}]
 
 
