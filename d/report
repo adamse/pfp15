@@ -54,7 +54,7 @@ All results are in seconds, we used a database of about 70 MB size.
 
 As we can see, the sequential page ranking always takes longest, as it
 should, and the parallel one is about 3 times faster on a 4 core
-machine, which we is really good.
+machine, which we think is really good.
 
 When distributing the load over two "stronger" machines, the distributed version
 was the fastest, which also seems reasonable, and with two more equal machines
