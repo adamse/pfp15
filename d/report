@@ -1,10 +1,12 @@
-So we've tried our code on some different set-ups during the lab, but we will
-present three of them here. To understand the statistics, the function names
-are the following functions:
+So we've tried our code on some different set-ups during the lab, but
+we will present three of them here. To understand the statistics, the
+function names are the following functions:
+
 page_rank       - normal sequential page rank
 page_rank_par   - parallelised version of page rank
 page_rank_dist  - parallelised and distributed version of page rank
-page_rank_dist2 - load balanced version of page_rank_dist
+page_rank_dist2 - load balanced version of page_rank_dist, with 5
+workers per node
 
 First up is a three-computer set-up:
 Computer 1: Core2Quad Q8200 (4x2.3GHz), 2 nodes
@@ -28,7 +30,7 @@ Computer 2: Core2Duo SU7300 (2x1.3GHz), 1 node
  {page_rank_dist,91.905363},
  {page_rank_dist2,143.939145}]
 
-Lastly we tried running it only on the computer with the fastest cpu, to see
+Thirdly we tried running it only on the computer with the fastest cpu, to see
 how the overhead seemed to be.
 Computer 1: Core2Quad Q8200 (4x2.3GHz), 2 nodes
 
@@ -37,11 +39,22 @@ Computer 1: Core2Quad Q8200 (4x2.3GHz), 2 nodes
  {page_rank_dist,110.29865},
  {page_rank_dist2,181.933006}]
 
+Lastly we ran the the benchmark on two relatively low powered dual core
+machines, here we see a nice speedup in the load balanced distributed
+map reduce, possibly due to that the machines are more equal in speed:
+Computer 1: Intel Core i5 1,8 GHz (with HT), 1 node
+Computer 2: AMD Turion II Neo N40L 1.5GHz, 1 node
+
+[{page_rank,414.990752},
+ {page_rank_par,244.81077},
+ {page_rank_dist,247.074652},
+ {page_rank_dist2,205.674031}]
+
 All results are in seconds, we used a database of about 70 MB size.
 
-As we can see, the sequential page ranking always takes longest, as it should,
-and the parallel one is about 3 times faster on a 4 core machine, which we
-think is really good.
+As we can see, the sequential page ranking always takes longest, as it
+should, and the parallel one is about 3 times faster on a 4 core
+machine, which we is really good.
 
 When distributing the load over two "stronger" machines, the distributed version
 was the fastest, which also seems reasonable, and with two more equal machines
@@ -49,9 +62,7 @@ we would probably have seen nicer results on distributing (or running the
 benchmarks from one of the slower computers in the set-up). We actually tried
 to do the benchmarks from the Atom-powered computer, but it had to write so
 much to the swap partition (on a slow hdd), so the connection to it was closed
-by the other nodes because of netword timeout.
+by the other nodes because of network timeout.
 
-Also, we can see that the load-balancing here poses a bigger overhead than
-the gain from using it, as it is always slower than the equally distributing
-function.
-
+Also, we can see that the load-balancing here sometimes poses a bigger
+overhead than the gain from using it.
